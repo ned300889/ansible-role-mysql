@@ -1,32 +1,76 @@
-name: Molecule
-on:
+---
+name: CI
+'on':
+  pull_request:
   push:
     branches:
       - main 
-  pull_request:
-    branches:
-      - main 
+  schedule:
+    - cron: "0 1 * * 3"
+
+defaults:
+  run:
+    working-directory: 'ned300889.mysql'
 
 jobs:
-  molecule:
+
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        scenario:
-          - debian11
-          - debian10
-          - debian9
-          - ubuntu1804 
-          - ubuntu2004
     steps:
-      - name: Checkout
+      - name: Check out the codebase.
         uses: actions/checkout@v2
         with:
-          path: "${{ github.repository }}"
-      - name: Molecule
-        uses: gofrolist/molecule-action@v2
+          path: 'ned300889.mysql'
+
+      - name: Set up Python 3.
+        uses: actions/setup-python@v2
         with:
-          molecule_command: test
+          python-version: '3.x'
+
+      - name: Install test dependencies.
+        run: pip3 install yamllint
+
+      - name: Lint code.
+        run: |
+          yamllint .
+  molecule:
+    name: Molecule
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        distro:
+          - ubuntu2004
+          - ubuntu1804
+          - debian9
+          - debian10
+          - debian11
+
+    steps:
+      - name: Check out the codebase.
+        uses: actions/checkout@v2
+        with:
+          path: 'ned300889.mysql'
+
+      - name: Set up Python 3.
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install test dependencies.
+        run: pip3 install ansible molecule[docker] docker
+
+      - name: Disable AppArmor on Debian.
+        run: |
+            set -x
+            sudo apt-get install apparmor-profiles
+            sudo ln -s /etc/apparmor.d/usr.sbin.mysqld /etc/apparmor.d/disable/
+            sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.mysqld
+        if: ${{ startsWith(matrix.distro, 'debian') }}
+
+      - name: Run Molecule tests.
+        run: molecule test
         env:
-          MOLECULE_DISTRO: ${{ matrix.scenario }}
+          PY_COLORS: '1'
+          ANSIBLE_FORCE_COLOR: '1'
+          MOLECULE_DISTRO: ${{ matrix.distro }}
