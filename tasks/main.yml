@@ -1,3 +1,8 @@
 ---
 - name: Install required version of mysql
   include_tasks: "{{ ansible_os_family }}-mysql-install.yml"
+- name: Enable and start mysql
+  systemd:
+    name: mysql
+    state: started
+    enabled: true

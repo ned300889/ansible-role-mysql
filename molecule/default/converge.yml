@@ -2,6 +2,6 @@
 - name: Converge
   hosts: all
   tasks:
-    - name: "Include mysql-test"
+    - name: "Include mysql"
       include_role:
-        name: "mysql_test"
+        name: "mysql"
