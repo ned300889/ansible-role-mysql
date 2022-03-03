@@ -1,0 +1,3 @@
+---
+__mysql_packages: ['default-mysql-server']
+__mysql_daemon: mariadb

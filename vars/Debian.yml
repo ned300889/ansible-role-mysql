@@ -1,0 +1,3 @@
+---
+__mysql_packages: ['mysql-server']
+__mysql_daemon: mysql

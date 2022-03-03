@@ -1,14 +1,21 @@
 ---
-# This is an example playbook to execute Ansible tests.
-
 - name: Verify
   hosts: all
-  gather_facts: true
+  gather_facts: true 
   tasks:
+    - name: Set fact for Debian
+      set_fact:
+        mysql_daemon: mariadb
+      when: ansible_distribution == "Debian"
+
+    - name: Set fact for ubuntu
+      set_fact:
+        msql_daemon: mysql
+      when: ansible_distribution == "Ubuntu"
+
     - name: Gather info 
       ansible.builtin.service_facts:
     - name: Test mysql service is running
       debug:
-        var: ansible_facts.services['mysql']
-      failed_when: "'stopped' in ansible_facts.services['mysql']['state'] "
-
+        var: ansible_facts.services['{{ mysql_daemon }}']
+      failed_when: "'stopped' in ansible_facts.services['{{ mysql_daemon }}']['state'] "
