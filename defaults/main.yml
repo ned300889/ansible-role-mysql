@@ -1,0 +1,4 @@
+---
+mysql_packages: ['mysql-server']
+mysql_python_package_debian: python3-mysqldb
+mysql_daemon: mysqld
