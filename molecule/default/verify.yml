@@ -10,7 +10,7 @@
 
     - name: Set fact for ubuntu
       set_fact:
-        msql_daemon: mysql
+        mysql_daemon: mysql
       when: ansible_distribution == "Ubuntu"
 
     - name: Gather info 
