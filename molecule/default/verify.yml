@@ -3,19 +3,20 @@
   hosts: all
   gather_facts: true 
   tasks:
+    - name: Get information on state
+      ansible.builtin.service_facts:
+
     - name: Set fact for Debian
       set_fact:
-        mysql_daemon: mariadb
+        mysql_status: "{{ ansible_facts.services['mariadb.service']['state'] }}"
       when: ansible_distribution == "Debian"
 
     - name: Set fact for ubuntu
       set_fact:
-        mysql_daemon: mysql
+        mysql_status: "{{ ansible_facts.services['mysql']['state'] }}"
       when: ansible_distribution == "Ubuntu"
 
-    - name: Gather info 
-      ansible.builtin.service_facts:
     - name: Test mysql service is running
       debug:
-        var: ansible_facts.services['{{ mysql_daemon }}']
-      failed_when: "'stopped' in ansible_facts.services['{{ mysql_daemon }}']['state'] "
+        var: mysql_status
+      failed_when: "'stopped' in mysql_status"
